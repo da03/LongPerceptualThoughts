@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-family: Arial, sans-serif;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            vertical-align: top;
+        }
+        img {
+            max-width: 150px;
+            height: auto;
+        }
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <table>
+        <thead>
+            <tr>
+                <th>Image</th>
+                <th>Question & Choices</th>
+                <th>Thought</th>
+                <th>Answer</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in rows %}
+            <tr>
+                <td><img src="{{ row.image_path }}" alt="Image"></td>
+                <td>
+                    <strong>Q:</strong> {{ row._prompt }}<br>
+                    <strong>GT answer:</strong> {{ row._answer }}<br>
+                </td>
+                <td><pre>&lt;think&gt;{{ row.simple_cot_parsed_thought }}&lt;/think&gt;</pre><br><pre>&lt;answer&gt;{{ row.simple_cot_parsed_answer }}&lt;/answer&gt;</pre></td>
+                <td><pre>&lt;think&gt;{{ row.extended_cot_parsed_thought }}&lt;/think&gt;</pre><br><pre>&lt;answer&gt;{{ row.extended_cot_parsed_answer }}&lt;/answer&gt;</pre></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
