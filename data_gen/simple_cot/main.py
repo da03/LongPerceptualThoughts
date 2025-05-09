@@ -3,16 +3,19 @@ import re
 import json
 import torch
 import pandas as pd
+
 from pathlib import Path
 from utils import infer_template, MultipleChoicesRandomizer, convert_sft_simple_cot_dataset, convert_sft_thought_expansion_dataset, extract_options_from_user_prompt, get_unique_id
 from itertools import islice
 from tqdm import tqdm
+
+import sys
+sys.path.append(os.path.join(os.environ["LLAMAFACTORY_DIR"], "src"))
+
+
 import ipdb
-
-
 MODEL_NAME = "qwen2.5_vl_instruct"
-QWEN2_5_VL_INSTRUCT_PATH = "/scratch/ssd004/scratch/selflein/Qwen2.5-VL-7B-Instruct"
-os.environ["llamafactory_dir"] = "/h/andrewliao/research/visual_reasoning_pomdp/LLaMA-Factory"
+QWEN2_5_VL_INSTRUCT_PATH = os.environ["QWEN2_5_VL_INSTRUCT_PATH"]
 
 
 def initialize_dataset(config):
@@ -35,12 +38,12 @@ def initialize_dataset(config):
         model_name_or_path=QWEN2_5_VL_INSTRUCT_PATH,
         dataset=dataset_name,
         vllm_config=f"\"{vllm_config_str}\"",
-        dataset_dir=os.path.join(os.environ["llamafactory_dir"], "data"),
+        dataset_dir=os.path.join(os.environ["LLAMAFACTORY_DIR"], "data"),
         template=infer_template(QWEN2_5_VL_INSTRUCT_PATH),
         preprocessing_num_workers=8,
         infer_dtype="half",
         trust_remote_code=True,
-        tokenized_path="outputs/tokenized_path/" + dataset_name
+        # tokenized_path="outputs/tokenized_path/" + dataset_name
     ))
     training_args = Seq2SeqTrainingArguments(output_dir="dummy_dir")
     tokenizer_module = load_tokenizer(model_args)
@@ -168,13 +171,13 @@ def generate_simple_cot_chunk(start, end, config, df, dataset_module, llm, sampl
         
 
 def generate_simple_cot(start=0, end=100):
-    mcq_gen_output_path = Path('outputs/mcq_gen/docci_mcq.csv')
+    mcq_gen_output_path = Path('outputs/docci_mcq.csv')
     df = pd.read_csv(mcq_gen_output_path, dtype=str, keep_default_na=False)
     
     # Initialize dataset
     # Only the following config may be changed
     config = {
-        "image_resolution": 512*512,
+        "image_resolution": 512 * 512,
         "cutoff_len": 1024,
         # vllm
         "max_model_len": 16384,
@@ -190,7 +193,7 @@ def generate_simple_cot(start=0, end=100):
     model_args, data_args, template_obj, dataset_module, tokenizer = initialize_dataset(config)
     llm, sampling_params = initialize_vllm(config, template_obj, tokenizer)
     
-    assert len(df) == len(dataset_module["train_dataset"]), f"Data provided in 'outputs/mcq_gen/docci_mcq.csv' \
+    assert len(df) == len(dataset_module["train_dataset"]), f"Data provided in 'outputs/docci_mcq.csv' \
         does not match the dataset size registered as `long_perceptual_thoughts/sft_docci_all_mcqs`."
     
     # Generate CoT
@@ -253,7 +256,7 @@ def collect_simple_cot():
     from pandarallel import pandarallel
     pandarallel.initialize(progress_bar=True)
 
-    mcq_gen_output_path = Path('outputs/mcq_gen/docci_mcq.csv')
+    mcq_gen_output_path = Path('outputs/docci_mcq.csv')
     df = pd.read_csv(mcq_gen_output_path, dtype=str, keep_default_na=False)
     
     dataset_name = "long_perceptual_thoughts/sft_docci_all_mcqs"
@@ -297,21 +300,15 @@ def collect_simple_cot():
     print(f"#Unique Images: {len(exploded_df['image_id'].unique())}")
     print(f"#Unique MCQs: {len(exploded_df['mcq_unique_id'].unique())}")
     
-    # create sft dataset
-    sampled_500_images = json.load(open("outputs/docci_500_images.json"))
-    sampled_1000_images = json.load(open("outputs/docci_1000_images.json"))
-    sampled_2000_images = json.load(open("outputs/docci_2000_images.json"))
-    sampled_4000_images = json.load(open("outputs/docci_4000_images.json"))
     
-    # Create SFT dataset
+    SAMPLE_RATIO = 1 / 3.75
     correct_df = exploded_df[exploded_df["simple_cot_parsed_correct"] == True]
-    for image_list, prefix in zip([sampled_500_images, sampled_1000_images, sampled_2000_images, sampled_4000_images, None], 
-                                  ["sft_docci_500_images_", "sft_docci_1000_images_", "sft_docci_2000_images_", "sft_docci_4000_images_", "sft_docci_all_"]):
-        
-        # convert_sft_simple_cot_dataset(correct_df, image_list, f"outputs/{prefix}simple_cots.json")
-        SAMPLE_RATIO = 1 / 3.75
-        convert_sft_simple_cot_dataset(correct_df, image_list, f"outputs/{prefix}simple_cots_weighted_sample.json", weighted_sample=True, sample_ratio=SAMPLE_RATIO)
-    
+    for tag in ["500_images", "1000_images", "2000_images", "4000_images"]:
+        if Path(f"outputs/docci_{tag}.json").exists():
+            image_list = json.load(open(f"outputs/docci_{tag}.json"))
+            convert_sft_simple_cot_dataset(correct_df, image_list, f"outputs/sft_docci_{tag}_simple_cots_weighted_sample.json", weighted_sample=True, sample_ratio=SAMPLE_RATIO)
+            
+    convert_sft_simple_cot_dataset(correct_df, None, f"outputs/sft_docci_all_simple_cots_weighted_sample.json", weighted_sample=True, sample_ratio=SAMPLE_RATIO)
     
     # Create for thought-expansion
     exploded_df.to_csv(Path(f"outputs/simple_cot/{MODEL_NAME}.csv"), index=False)

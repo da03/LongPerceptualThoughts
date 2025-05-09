@@ -1,21 +1,14 @@
-import sys
-sys.path.append("../")
-from slurm_utils import create_slrm_job_directory, create_slurm_script, partition_to_max_time
-
 import os
 import fire
 import json
+
 from tqdm import tqdm
 from datetime import datetime
-from mcq_gen import generate_mcq_from_captions, evaluate_MCQ_difficulty
+from mcq_gen import generate_mcq_from_captions
 from simple_cot import generate_simple_cot, collect_simple_cot
 from expand_cot import generate_extended_cot, collect_extended_cot, create_sft_dpo_dataset
 from jinja2.sandbox import SandboxedEnvironment
 from pathlib import Path
-import ipdb
-
-os.environ["DISABLE_VERSION_CHECK"] = "1"
-os.environ["PROJECT_ROOT"] = "/h/andrewliao/research/LongPerceptualThoughts"
 
 
 def submit_slurm_jobs():
@@ -58,8 +51,8 @@ def submit_slurm_jobs():
         os.system(command)
         
 
-def create_dataset_info():
-    dataset_info = {}
+def update_llamafactory_dataset_info():
+    sft_dataset_info = {}
     for p in tqdm(Path("outputs").glob("sft_*.json"), desc="Creating SFT dataset info"):
         
         if "images" in json.load(open(p))[0]:
@@ -98,10 +91,10 @@ def create_dataset_info():
                 }
             }
             
-        dataset_info[f"long_perceptual_thoughts/{p.stem}"] = info
-    json.dump(dataset_info, open("long_perceptual_thoughts_dataset_info.json", "w"), indent=4)
+        sft_dataset_info[f"long_perceptual_thoughts/{p.stem}"] = info
+    json.dump(sft_dataset_info, open("long_perceptual_thoughts_dataset_info.json", "w"), indent=4)
     
-    dataset_info = {}
+    dpo_dataset_info = {}
     for p in tqdm(Path("outputs").glob("dpo_*.json"), desc="Creating DPO dataset info"):
         info = {
             "file_name": str(p.absolute()),
@@ -121,19 +114,27 @@ def create_dataset_info():
                 "system_tag": "system"
             }
         }
-        dataset_info[f"long_perceptual_thoughts/{p.stem}"] = info
-    json.dump(dataset_info, open("long_perceptual_thoughts_preference_dataset_info.json", "w"), indent=4)
+        dpo_dataset_info[f"long_perceptual_thoughts/{p.stem}"] = info
+    json.dump(dpo_dataset_info, open("long_perceptual_thoughts_preference_dataset_info.json", "w"), indent=4)
+    
+    # Merge it to `data/dataset_info.json`
+    orig_dataset_info = json.load(open(os.path.join(os.environ["LLAMAFACTORY_DIR"], "data/dataset_info.json")))
+    orig_dataset_info.update(sft_dataset_info)
+    orig_dataset_info.update(dpo_dataset_info)
+    json.dump(orig_dataset_info, open(os.path.join(os.environ["LLAMAFACTORY_DIR"], "data/dataset_info.json"), "w"), indent=4)
     
     
 if __name__ == '__main__':
     fire.Fire({
+        # stage 1: ask
         'generate_mcq_from_captions': generate_mcq_from_captions, 
-        'evaluate_MCQ_difficulty': evaluate_MCQ_difficulty, 
+        # stage 2: think
         'generate_simple_cot': generate_simple_cot,
         'collect_simple_cot': collect_simple_cot, 
+        # stage 3: think harder
         'generate_extended_cot': generate_extended_cot, 
         'collect_extended_cot': collect_extended_cot, 
+        # create dataset
         'create_sft_dpo_dataset': create_sft_dpo_dataset, 
-        'create_dataset_info': create_dataset_info,
-        'submit_slurm_jobs': submit_slurm_jobs
+        'update_llamafactory_dataset_info': update_llamafactory_dataset_info,
     })

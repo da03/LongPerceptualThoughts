@@ -1,1 +1,1 @@
-from .main import generate_mcq_from_captions, evaluate_MCQ_difficulty
+from .main import generate_mcq_from_captions
