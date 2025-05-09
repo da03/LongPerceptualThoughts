@@ -5,11 +5,13 @@ import torch
 import ast
 import math
 import random
-#import swifter
 import pandas as pd
 from functools import partial
 from collections import Counter
 from pathlib import Path
+from itertools import islice
+from tqdm import tqdm
+
 from utils import (
     infer_template, 
     OpenAICacheClient, 
@@ -22,11 +24,8 @@ from utils import (
     length_weighted_subsample_df, 
     string_to_seed
 )
-from itertools import islice
-from tqdm import tqdm
 
 tqdm.pandas()
-import ipdb
 
 
 BAD_WORDS = "description,descriptions,describe,describes,described,mention,mentions,mentioned,misread,text,state,states,stated,say,says,said,internal,mental,visualize,visualization,the image described,user's,detailed image"
@@ -245,7 +244,7 @@ def extract_thought_and_answer(example):
     parsed_choice_dict = {c[0]: c[1].lower() for c in parsed_choice_list}
     gt_answer = example["mcq_answer"]
     gt_answer_option = [c[0] for c in parsed_choice_list if c[1] == gt_answer]
-    assert len(gt_answer_option) == 1 #, ipdb.set_trace()
+    assert len(gt_answer_option) == 1 
         
     gt_answer_option = gt_answer_option[0]
     res = []

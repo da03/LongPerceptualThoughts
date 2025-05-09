@@ -13,7 +13,6 @@ from tqdm import tqdm
 from copy import deepcopy
 from pathlib import Path
 from jinja2.sandbox import SandboxedEnvironment
-import ipdb
 
 # Set your OpenAI API key
 if "OPENAI_API_KEY" in os.environ:

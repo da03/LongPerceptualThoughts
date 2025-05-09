@@ -64,7 +64,14 @@ The output is a JSON format compatible with LLaMA-Factory.
 For details, see the data generation README at [here](./data_gen/README.md)
 
 ```bash
-cd data_gen/
+# Prepare DOCCI or your own dataset first
+# Check the website at https://google.github.io/docci/#downloads
+cd data_gen/caption_datasets/docci
+wget https://storage.googleapis.com/docci/data/docci_descriptions.jsonlines
+wget https://storage.googleapis.com/docci/data/docci_images.tar.gz
+tar -xvf docci_images.tar.gz
+
+cd ../../
 bash run_3_stages_test.sh
 ```
 

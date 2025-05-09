@@ -5,15 +5,22 @@ import torch
 import pandas as pd
 
 from pathlib import Path
-from utils import infer_template, MultipleChoicesRandomizer, convert_sft_simple_cot_dataset, convert_sft_thought_expansion_dataset, extract_options_from_user_prompt, get_unique_id
 from itertools import islice
 from tqdm import tqdm
+
+from utils import (
+    infer_template, 
+    MultipleChoicesRandomizer, 
+    convert_sft_simple_cot_dataset, 
+    convert_sft_thought_expansion_dataset, 
+    extract_options_from_user_prompt, 
+    get_unique_id
+)
 
 import sys
 sys.path.append(os.path.join(os.environ["LLAMAFACTORY_DIR"], "src"))
 
 
-import ipdb
 MODEL_NAME = "qwen2.5_vl_instruct"
 QWEN2_5_VL_INSTRUCT_PATH = os.environ["QWEN2_5_VL_INSTRUCT_PATH"]
 
@@ -208,7 +215,7 @@ def extract_thought_and_answer(example):
     parsed_choice_dict = {c[0]: c[1].lower() for c in parsed_choice_list}
     gt_answer = example["mcq_answer"]
     gt_answer_option = [c[0] for c in parsed_choice_list if c[1] == gt_answer]
-    assert len(gt_answer_option) == 1, ipdb.set_trace()
+    assert len(gt_answer_option) == 1
         
     gt_answer_option = gt_answer_option[0]
     

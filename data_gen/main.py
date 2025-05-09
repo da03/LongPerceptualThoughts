@@ -4,11 +4,12 @@ import json
 
 from tqdm import tqdm
 from datetime import datetime
-from mcq_gen import generate_mcq_from_captions
-from simple_cot import generate_simple_cot, collect_simple_cot
-from expand_cot import generate_extended_cot, collect_extended_cot, create_sft_dpo_dataset
 from jinja2.sandbox import SandboxedEnvironment
 from pathlib import Path
+
+from stage_1_mcq_gen import generate_mcq_from_captions
+from stage_2_simple_cot import generate_simple_cot, collect_simple_cot
+from stage_3_expand_cot import generate_extended_cot, collect_extended_cot, create_sft_dpo_dataset
 
 
 def submit_slurm_jobs():
