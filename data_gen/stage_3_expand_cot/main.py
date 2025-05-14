@@ -150,7 +150,7 @@ def yield_chunks(dataset, metadata_df, template_obj, tokenizer, chunk_size=50):
     
 def generate_extended_cot_chunk(cognitive_phrase, start, end, config, df, dataset_module, llm, sampling_params, tokenizer, template_obj):
     
-    intermediate_df_path = Path(f"outputs/expand_cot/intermediate_df/{SIMPLE_COT_MODEL_NAME}/{EXPAND_COT_MODEL_NAME}/{cognitive_phrase.replace('|', '')}_{start}_{end}.jsonl")
+    intermediate_df_path = Path(f"outputs/stage_3_expand_cot/intermediate_df/{SIMPLE_COT_MODEL_NAME}/{EXPAND_COT_MODEL_NAME}/{cognitive_phrase.replace('|', '')}_{start}_{end}.jsonl")
     intermediate_df_path.parent.mkdir(parents=True, exist_ok=True)
     json.dump(config, open(intermediate_df_path.parent / "config.json", "w"))
     eos_word = tokenizer.special_tokens_map["eos_token"]
@@ -299,9 +299,9 @@ def collect_extended_cot():
     df["mcq_messages"] = df["mcq_messages"].parallel_apply(ast.literal_eval)
     
     # Collect all intermediate files
-    expand_cot_config = json.load(open(Path(f"outputs/expand_cot/intermediate_df/{SIMPLE_COT_MODEL_NAME}/{EXPAND_COT_MODEL_NAME}/config.json")))
+    expand_cot_config = json.load(open(Path(f"outputs/stage_3_expand_cot/intermediate_df/{SIMPLE_COT_MODEL_NAME}/{EXPAND_COT_MODEL_NAME}/config.json")))
     
-    intermediate_df_paths = Path(f"outputs/expand_cot/intermediate_df/{SIMPLE_COT_MODEL_NAME}/{EXPAND_COT_MODEL_NAME}").glob("*.jsonl")
+    intermediate_df_paths = Path(f"outputs/stage_3_expand_cot/intermediate_df/{SIMPLE_COT_MODEL_NAME}/{EXPAND_COT_MODEL_NAME}").glob("*.jsonl")
     intermediate_df_list = []
     for p in tqdm(intermediate_df_paths, desc="Loading intermediate files"):
         _df = pd.read_json(p, lines=True)
@@ -353,7 +353,7 @@ def collect_extended_cot():
     print(f"#Unique Simple CoTs: {len(exploded_df['simple_cot_unique_id'].unique())}")
     print(f"Overall Accuracy: {exploded_df['extended_cot_parsed_correct'].mean():.3f}")
 
-    save_df_in_chunks(exploded_df, chunk_size=5e5, base_filename=f"outputs/expand_cot/{SIMPLE_COT_MODEL_NAME}-{EXPAND_COT_MODEL_NAME}")
+    save_df_in_chunks(exploded_df, chunk_size=5e5, base_filename=f"outputs/stage_3_expand_cot/{SIMPLE_COT_MODEL_NAME}-{EXPAND_COT_MODEL_NAME}")
     
 
 def _create_dpo_dataset(df):
@@ -526,7 +526,7 @@ def filter_inconsistent_thought_and_answer(df):
     
     openai_client = {}
     model_id = 'gpt-4o-mini-2024-07-18'
-    CACHE_DIR = Path('outputs/expand_cot/.cache') / model_id
+    CACHE_DIR = Path('outputs/stage_3_expand_cot/.cache') / model_id
     openai_client = OpenAICacheClient(model_id=model_id, cache_dir=CACHE_DIR, force_use_cache=False, verbose=True)
     
     system_prompt = """You are good at identifying inconsistencies between text."""
@@ -601,7 +601,7 @@ def _create_sft(image_list, O_df, O_O_df, X_O_df, image_list_tag, preprocess_fil
     sampled_O_any_df = length_weighted_subsample_df(sampled_O_any_df, int(len(sampled_O_any_df) * SUBSAMPLE_RATIO), "extended_cot_parsed_thought", group_key="mcq_unique_id")
     sampled_X_O_df = length_weighted_subsample_df(sampled_X_O_df, int(len(sampled_O_any_df)), "added_thought", group_key="mcq_unique_id")
     if preprocess_filter_inconsistency:
-        p_negative = Path("outputs/expand_cot/inconsistent_thought_and_answer.csv")
+        p_negative = Path("outputs/stage_3_expand_cot/inconsistent_thought_and_answer.csv")
         if p_negative.exists():
             negative_examples = pd.read_csv(str(p_negative))
             sampled_X_O_df["filter_result"] = sampled_X_O_df["extended_cot_unique_id"].apply(lambda x: x not in negative_examples["extended_cot_unique_id"].values)
@@ -614,13 +614,13 @@ def _create_sft(image_list, O_df, O_O_df, X_O_df, image_list_tag, preprocess_fil
         sampled_X_O_df = sampled_X_O_df[sampled_X_O_df["filter_result"]]
         
         print(f"Remove {len(inconsistent_thought_and_answer)} examples due to inconsistent thought and snwer")
-        p_negative = Path("outputs/expand_cot/inconsistent_thought_and_answer.csv")
+        p_negative = Path("outputs/stage_3_expand_cot/inconsistent_thought_and_answer.csv")
         if p_negative.exists():
             negative_examples = pd.read_csv(str(p_negative))
             inconsistent_thought_and_answer = pd.concat([negative_examples, inconsistent_thought_and_answer], ignore_index=True)
             inconsistent_thought_and_answer.drop_duplicates(subset=["extended_cot_unique_id"], keep='first', inplace=True)
             
-        p_positive = Path("outputs/expand_cot/consistent_thought_and_answer.csv")
+        p_positive = Path("outputs/stage_3_expand_cot/consistent_thought_and_answer.csv")
         if p_positive.exists():
             positive_examples = pd.read_csv(str(p_positive))
             consistent_thought_and_answer = pd.concat([positive_examples, consistent_thought_and_answer], ignore_index=True)
@@ -670,8 +670,8 @@ def create_sft_dpo_dataset(dataset_type, preprocess_filter_inconsistency=False):
             # Filter X -> O
             X_O_df = df[df["extended_cot_parsed_correct"] & ~df["simple_cot_parsed_correct"]]
             rest_df = df[df["simple_cot_parsed_correct"] | (~df["extended_cot_parsed_correct"] & ~df["simple_cot_parsed_correct"])]
-            p_negative = Path("outputs/expand_cot/inconsistent_thought_and_answer.csv")
-            p_positive = Path("outputs/expand_cot/consistent_thought_and_answer.csv")
+            p_negative = Path("outputs/stage_3_expand_cot/inconsistent_thought_and_answer.csv")
+            p_positive = Path("outputs/stage_3_expand_cot/consistent_thought_and_answer.csv")
             assert p_negative.exists() and p_positive.exists(), f"Please run `filter_inconsistent_thought_and_answer` first."
             inconsistent_thought_and_answer = pd.read_csv(str(p_negative))
             consistent_thought_and_answer = pd.read_csv(str(p_positive))

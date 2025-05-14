@@ -137,7 +137,7 @@ def yield_chunks(dataset, metadata_df, template_obj, tokenizer, image_resolution
     
 def generate_simple_cot_chunk(start, end, config, df, dataset_module, llm, sampling_params, tokenizer, template_obj):
     
-    intermediate_df_path = Path(f"outputs/simple_cot/intermediate_df/{MODEL_NAME}/{start}_{end}.jsonl")
+    intermediate_df_path = Path(f"outputs/stage_2_simple_cot/intermediate_df/{MODEL_NAME}/{start}_{end}.jsonl")
     intermediate_df_path.parent.mkdir(parents=True, exist_ok=True)
     json.dump(config, open(intermediate_df_path.parent / "config.json", "w"))
     thinking_bos_token = tokenizer.encode("<think>")
@@ -276,9 +276,9 @@ def collect_simple_cot():
     df = pd.merge(df, registered_df, on='mcq_unique_id')
     
     # Collect all intermediate files
-    simple_cot_config = json.load(open(Path(f"outputs/simple_cot/intermediate_df/{MODEL_NAME}/config.json")))
+    simple_cot_config = json.load(open(Path(f"outputs/stage_2_simple_cot/intermediate_df/{MODEL_NAME}/config.json")))
     
-    intermediate_df_paths = Path(f"outputs/simple_cot/intermediate_df/{MODEL_NAME}").glob("*.jsonl")
+    intermediate_df_paths = Path(f"outputs/stage_2_simple_cot/intermediate_df/{MODEL_NAME}").glob("*.jsonl")
     intermediate_df_list = [pd.read_json(p, lines=True) for p in intermediate_df_paths]
     intermediate_df = pd.concat(intermediate_df_list, ignore_index=True)
     intermediate_df["mcq_unique_id"] = intermediate_df["metadata"].apply(lambda x: x["metadata"]["mcq_unique_id"])
@@ -318,5 +318,5 @@ def collect_simple_cot():
     convert_sft_simple_cot_dataset(correct_df, None, f"outputs/sft_docci_all_simple_cots_weighted_sample.json", weighted_sample=True, sample_ratio=SAMPLE_RATIO)
     
     # Create for thought-expansion
-    exploded_df.to_csv(Path(f"outputs/simple_cot/{MODEL_NAME}.csv"), index=False)
+    exploded_df.to_csv(Path(f"outputs/stage_2_simple_cot/{MODEL_NAME}.csv"), index=False)
     convert_sft_thought_expansion_dataset(exploded_df, "outputs/sft_docci_thought_expansion.json")

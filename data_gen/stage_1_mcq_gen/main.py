@@ -27,12 +27,12 @@ def check_MCQ_valid(example):
             
 def generate_mcq_from_captions(max_examples=1000, verbose=False):
     env = SandboxedEnvironment()
-    mcq_gen_prompt_template = env.from_string(open("mcq_gen/templates/caption_to_mcq.jinja2").read())
-    parse_to_mcq_prompt_template = env.from_string(open("mcq_gen/templates/parse_to_mcq.jinja2").read())
+    mcq_gen_prompt_template = env.from_string(open("stage_1_mcq_gen/templates/caption_to_mcq.jinja2").read())
+    parse_to_mcq_prompt_template = env.from_string(open("stage_1_mcq_gen/templates/parse_to_mcq.jinja2").read())
 
     openai_client = {}
     for model_name, model_id in zip(['gpt-4o-mini', 'gpt-4o'], [gpt_4o_mini_model_id, gpt_4o_model_id]):
-        CACHE_DIR = Path('outputs/mcq_gen/.cache') / model_id
+        CACHE_DIR = Path('outputs/stage_1_mcq_gen/.cache') / model_id
         CACHE_DIR.mkdir(exist_ok=True, parents=True)
         openai_client[model_name] = OpenAICacheClient(model_id=model_id, cache_dir=CACHE_DIR, force_use_cache=force_use_cache, verbose=verbose)
         
