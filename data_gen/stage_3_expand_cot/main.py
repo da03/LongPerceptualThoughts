@@ -658,12 +658,6 @@ def create_sft_dpo_dataset(dataset_type, preprocess_filter_inconsistency=False):
     if preprocess_filter_inconsistency:
         preprocess_tag = f"{preprocess_tag}_filter_inconsistency"
 
-    
-    # sampled_500_images = json.load(open("outputs/docci_500_images.json"))
-    # sampled_1000_images = json.load(open("outputs/docci_1000_images.json"))
-    # sampled_2000_images = json.load(open("outputs/docci_2000_images.json"))
-    # sampled_4000_images = json.load(open("outputs/docci_4000_images.json"))
-    
     # Create DPO dataset
     if dataset_type == "DPO":
         if preprocess_filter_inconsistency:
