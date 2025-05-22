@@ -21,8 +21,8 @@ COGNITIVE_PHRASE="Wait,"
 
 export DISABLE_VERSION_CHECK=1
 export PROJECT_ROOT="/PATH/TO/GITHUB/ROOT/"
--export QWEN2_5_VL_INSTRUCT_PATH="/PATH/TO/QWEN2.5-VL-INSTRUCT-7B"
--export R1_DISTILLED_QWEN_32_B="/PATH/TO/R1-DISTILLED-QWEN-32B"
+export QWEN2_5_VL_INSTRUCT_PATH="/PATH/TO/QWEN2.5-VL-INSTRUCT-7B"
+export R1_DISTILLED_QWEN_32_B="/PATH/TO/R1-DISTILLED-QWEN-32B"
 export LLAMAFACTORY_DIR="${PROJECT_ROOT}/LLaMA-Factory"
 
 
@@ -51,6 +51,7 @@ for ((i=0; i<N_TEST_IMGS; i+=STAGE_3_CHUNK_SIZE)); do
 done
 python main.py collect_extended_cot
 python main.py create_sft_dpo_dataset SFT
+python main.py create_sft_dpo_dataset DPO
 echo -e "${GREEN}✔ Extended CoT generation complete${NC}"
 
 
