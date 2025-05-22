@@ -207,7 +207,7 @@ def generate_extended_cot_chunk(cognitive_phrase, start, end, config, df, datase
         
 
 def generate_extended_cot(cognitive_phrase, start=0, end=100):
-    simple_cot_output_path = Path(f'outputs/simple_cot/{SIMPLE_COT_MODEL_NAME}.csv')
+    simple_cot_output_path = Path(f'outputs/stage_2_simple_cot/{SIMPLE_COT_MODEL_NAME}.csv')
     df = pd.read_csv(simple_cot_output_path, dtype=str, keep_default_na=False)
     
     # Initialize dataset
@@ -230,7 +230,7 @@ def generate_extended_cot(cognitive_phrase, start=0, end=100):
     model_args, data_args, template_obj, dataset_module, tokenizer = initialize_dataset(config)
     llm, sampling_params = initialize_vllm(config, template_obj, tokenizer)
     
-    assert len(df) == len(dataset_module["train_dataset"]), f"Data provided in 'outputs/simple_cot/{SIMPLE_COT_MODEL_NAME}.csv' \
+    assert len(df) == len(dataset_module["train_dataset"]), f"Data provided in 'outputs/stage_2_simple_cot/{SIMPLE_COT_MODEL_NAME}.csv' \
         does not match the dataset size registered as `long_perceptual_thoughts/sft_docci_all_mcqs`."
     
     # Generate CoT
@@ -294,7 +294,7 @@ def collect_extended_cot():
     from pandarallel import pandarallel
     pandarallel.initialize(progress_bar=True)
 
-    simple_cot_output_path = Path(f'outputs/simple_cot/{SIMPLE_COT_MODEL_NAME}.csv')
+    simple_cot_output_path = Path(f'outputs/stage_2_simple_cot/{SIMPLE_COT_MODEL_NAME}.csv')
     df = pd.read_csv(simple_cot_output_path, keep_default_na=False) 
     df["mcq_messages"] = df["mcq_messages"].parallel_apply(ast.literal_eval)
     
@@ -648,7 +648,7 @@ def create_sft_dpo_dataset(dataset_type, preprocess_filter_inconsistency=False):
     
     preprocess_tag = ""
     df_list = []
-    for p in tqdm(Path(f"outputs/expand_cot").glob(f"{SIMPLE_COT_MODEL_NAME}-{EXPAND_COT_MODEL_NAME}_part_*.csv"), desc="Loading chunks"):
+    for p in tqdm(Path(f"outputs/stage_3_expand_cot").glob(f"{SIMPLE_COT_MODEL_NAME}-{EXPAND_COT_MODEL_NAME}_part_*.csv"), desc="Loading chunks"):
         df_list.append(pd.read_csv(str(p)))
     
     df = pd.concat(df_list, ignore_index=True)

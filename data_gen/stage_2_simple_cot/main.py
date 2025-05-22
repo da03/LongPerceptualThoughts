@@ -268,7 +268,7 @@ def collect_simple_cot():
     
     dataset_name = "long_perceptual_thoughts/sft_docci_all_mcqs"
     from llamafactory.data.parser import get_dataset_list
-    json_filename = str(get_dataset_list([dataset_name], "/h/andrewliao/research/visual_reasoning_pomdp/LLaMA-Factory/data")[0])
+    json_filename = str(get_dataset_list([dataset_name], os.path.join(os.environ["LLAMAFACTORY_DIR"], "data"))[0])
     registered_df = pd.read_json(json_filename)
     registered_df["mcq_unique_id"] = registered_df["metadata"].apply(lambda x: x["mcq_unique_id"])
     registered_df.drop(columns=["metadata", "images"], inplace=True)

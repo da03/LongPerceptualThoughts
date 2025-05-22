@@ -58,7 +58,6 @@ def update_llamafactory_dataset_info():
         
         if "images" in json.load(open(p))[0]:
             
-            
             info = {
                 "file_name": str(p.absolute()),
                 "formatting": "sharegpt",

@@ -14,6 +14,7 @@ from copy import deepcopy
 from pathlib import Path
 from jinja2.sandbox import SandboxedEnvironment
 
+
 # Set your OpenAI API key
 if "OPENAI_API_KEY" in os.environ:
     api_key = os.environ['OPENAI_API_KEY']
@@ -23,25 +24,11 @@ else:
 
 DATASET_ROOT = Path('caption_datasets')
 DOCCI_DATASET_ROOT = DATASET_ROOT / 'docci'
-TEXTVIS_DATASET_ROOT = DATASET_ROOT / 'textvis'
-class TextVis:
-    def __init__(self, max_examples=-1, verbose=False):
-        df = pd.read_json(TEXTVIS_DATASET_ROOT / 'descriptions.json')
-        df["description"] = df.apply(lambda x: x["caption_L1"] + "\n\n" + x["caption_L2L3"], axis=1)
-        df["image_path"] = df.apply(lambda x: str(TEXTVIS_DATASET_ROOT / 'images' / f"{x['img_id']}.png"), axis=1)
-        df = df[df.apply(lambda x: Path(x['image_path']).exists(), axis=1)]             # Filter out missing images
-        
-        if max_examples > 0:
-            df = df.sample(n=max_examples, random_state=42)
-            
-        self.n_total_images = len(df)
-        self.df = df
-        self.image_dir = TEXTVIS_DATASET_ROOT / "images"
-
-
     
 class DOCCI:
     def __init__(self, split, max_examples=-1, verbose=False):
+        assert os.path.exists(DOCCI_DATASET_ROOT / 'docci_descriptions.jsonlines'), "Please download the DOCCI dataset from https://github.com/docci-ai/docci-dataset"
+            
         df = pd.read_json(DOCCI_DATASET_ROOT / 'docci_descriptions.jsonlines', lines=True)
         df = df[df.split == split]
         n_total_images = len(df)
@@ -86,7 +73,6 @@ class MultipleChoicesRandomizer:
     def parse_choice_list(choices):
         # Parse choices into a list of (letter, text) tuples
         choice_pattern = r'(?:\(([A-J])\)|([A-J])[\.\)])\s+(.*?)(?=\s+(?:\([A-J]\)|[A-J][\.\)])\s+|$)'
-        # parsed_choices = re.findall(choice_pattern, choices)
         parsed_choices = re.findall(choice_pattern, choices, re.DOTALL)
         
         # Clean up parsed choices
@@ -538,6 +524,12 @@ async def query_all(prompts_with_sys, model_id, max_concurrent=10):
     return results
     
     
+"""
+- OpenAI API key is required to use this class.
+- Main features:
+    - Cache to disk
+    - Batching of requests
+"""
 class OpenAICacheClient:
     def __init__(self, model_id, cache_dir='openai_cache', force_use_cache=False, verbose=False):
         '''

@@ -10,8 +10,8 @@ A framework for enriching visual reasoning with long chain-of-thoughts. We intro
 ![](./assets/overall_pipeline.gif)
 
 ## News
-- 2025/05/09: released code for data generation
-- 2025/04/21: released paper and dataset
+- ⭐ 2025/05/09: released code for data generation
+- ⭐ 2025/04/21: released paper and dataset
 
 ## Prerequisite
 1. CUDA==11.8
@@ -36,11 +36,7 @@ pip install setuptools_scm tqdm pandas omegaconf datasets==3.1.0
 
 cd vllm/
 python use_existing_torch.py
-git checkout fbbe1fbac669a17f81c74c696f11a51167ed6a3c
 pip install -e . --no-build-isolation -v
-
-cd ../LLaMA-Factory/
-git checkout 2e2f6bea07041371337ae96a58031a57d10de721
 </code></pre>
 
 Alternatively, you can install conda environment using the provided <code>.yml</code> file
@@ -48,15 +44,15 @@ Alternatively, you can install conda environment using the provided <code>.yml</
 
 cd vllm/
 python use_existing_torch.py
-git checkout fbbe1fbac669a17f81c74c696f11a51167ed6a3c
 pip install -e . --no-build-isolation -v
-
-cd ../LLaMA-Factory/
-git checkout 2e2f6bea07041371337ae96a58031a57d10de721
 </code></pre>
 
 </details>
 
+Note: Both LLaMA-Factory and vllm are actively developed open-source projecets and the code might break when there are version mismatches.
+
+
+### Data synthesis
 
 We provide a three-stage data synthesis pipeline using image-caption datasets (e.g., [google/DOCCI](https://huggingface.co/datasets/google/docci)) to generate:
 
@@ -77,7 +73,6 @@ tar -xvf docci_images.tar.gz
 cd ../../
 bash run_3_stages_test.sh
 ```
-
 
 ## 📚 Citation
 
