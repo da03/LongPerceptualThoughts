@@ -10,7 +10,7 @@ A framework for enriching visual reasoning with long chain-of-thoughts. We intro
 ![](./assets/overall_pipeline.gif)
 
 ## News
-- ⭐ 2025/05/2X: released train and eval code 
+- ⭐ 2025/05/23: released train and eval code 
 - ⭐ 2025/05/09: released code for data generation
 - ⭐ 2025/04/21: released paper and dataset
 
