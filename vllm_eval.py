@@ -134,14 +134,10 @@ def predict_and_eval(
     repetition_penalty: float,
     n_samples: int,
     force_thinking: bool = False, 
-    budget_force: bool = False, 
     do_eval: bool = True,
     use_tokenized_dataset: bool = True,
 ):
     
-    if budget_force:
-        assert n_samples == 1, "n_samples must be 1 for budget force"
-        
     Path(prediction_dir).mkdir(parents=True, exist_ok=True)
     
     # Initialize dataset
@@ -215,27 +211,10 @@ def predict_and_eval(
             else:
                 preds = [[o.text for o in result.outputs] for result in results]
             
-            
-            if budget_force:
-                budget_force_inputs = deepcopy(inputs)
-                initial_thought_list = []
-                for i, (example, pred) in enumerate(zip(budget_force_inputs, preds)):
-                    initial_thought = pred[0].split("</think>")[0].strip() + "\nWait,"
-                    initial_thought_list.append(initial_thought)
-                    budget_force_inputs[i]["prompt_token_ids"] = example["prompt_token_ids"] + tokenizer.encode(initial_thought)
-                    
-                print("Running budget force thinking...")
-                results = llm.generate(budget_force_inputs, sampling_params)
-                budget_force_preds = [[o.text for o in result.outputs] for result in results]
-                combined_preds = [[initial_thought + x for x in budget_force_pred] for initial_thought, budget_force_pred in zip(initial_thought_list, budget_force_preds)]
-                preds = combined_preds
-            
-            
             # Dump the predictions as well as the index
             with open(prediction_path, "a", encoding="utf-8") as f:
                 for prompt, pred, label, meta in zip(prompts, preds, labels, metadata):
                     f.write(json.dumps({"prompt": prompt, "predict": pred, "label": label, "index": meta["index"]}, ensure_ascii=False) + "\n")
-
 
 
         if do_eval:
@@ -253,7 +232,7 @@ def predict_and_eval(
                 pred_df["hit"] = pred_df.apply(compute_mcq_hit, axis=1)
                 
                 print(f"Dataset: {single_eval_dataset}")
-                print(f"Hit rate: {pred_df['hit'].sum() / len(pred_df)}")
+                print("\033[91m" + f"Hit rate: {pred_df['hit'].sum() / len(pred_df)}" + "\033[0m")
                 pred_df.to_csv(prediction_path.replace(".jsonl", "_parsed.csv"), index=False)
             except Exception as e:
                 print(f"Evaluation error: {e}")

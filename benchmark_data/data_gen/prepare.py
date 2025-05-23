@@ -126,7 +126,14 @@ def prepare_bench():
         choices = choices.strip().split("\n")
         return choices
     
-    v_star_image_dir = "./outputs/vstar_bench"
+    # TODO: Download vstar bench images to `./outputs`
+    assert os.path.exists("./outputs/vstar_bench"), \
+        "Please download vstar bench images to `./outputs/vstar_bench`" \
+            "git clone https://huggingface.co/datasets/craigwu/vstar_bench" \
+            "and run `python main.py prepare_bench` again."
+        
+    v_star_image_dir = Path("./outputs/vstar_bench")
+    v_star_image_dir = str(v_star_image_dir.absolute())
     dataset = load_dataset("craigwu/vstar_bench")
     
     df = dataset["test"].to_pandas()

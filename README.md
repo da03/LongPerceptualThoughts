@@ -107,10 +107,14 @@ llamafactory-cli train config/llama_factory_train_config.yaml
 ```
 
 1. **Evaluation jobs**
+
+By default, we evaluate on [V* bench](https://vstar-seal.github.io). Please download the images in V* Bench from [here](https://huggingface.co/datasets/craigwu/vstar_bench).
+
 ```bash
 export DISABLE_VERSION_CHECK=1
 export PROJECT_ROOT="/PATH/TO/GITHUB/ROOT/"
 export LLAMAFACTORY_DIR="${PROJECT_ROOT}/third_party_packages/LLaMA-Factory"
+
 cd benchmark_data/
 python main.py prepare_bench
 python main.py create_dataset_info
