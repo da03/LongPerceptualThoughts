@@ -17,13 +17,8 @@ STAGE_3_CHUNK_SIZE=500
 # Feel free to change this phrase to any other cognitive phrase you want to use. 
 # This phrase corresponds to the cognitive cues mentioned in Section 2.3 of the paper.
 COGNITIVE_PHRASE="Wait,"
-
-
-export DISABLE_VERSION_CHECK=1
-export PROJECT_ROOT="/PATH/TO/GITHUB/ROOT/"
 export QWEN2_5_VL_INSTRUCT_PATH="/PATH/TO/QWEN2.5-VL-INSTRUCT-7B"
 export R1_DISTILLED_QWEN_32_B="/PATH/TO/R1-DISTILLED-QWEN-32B"
-export LLAMAFACTORY_DIR="${PROJECT_ROOT}/LLaMA-Factory"
 
 
 # Stage 1: Generate MCQ
