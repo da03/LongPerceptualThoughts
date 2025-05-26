@@ -168,7 +168,6 @@ def generate_extended_cot_chunk(cognitive_phrase, start, end, config, df, datase
         df, 
         template_obj=template_obj, 
         tokenizer=tokenizer, 
-        #image_resolution=config["image_resolution"], 
         chunk_size=config["chunk_size"]
     ):
         

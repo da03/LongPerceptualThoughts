@@ -39,7 +39,8 @@ def initialize_dataset(config):
     }
     vllm_config_str = json.dumps(vllm_config).replace("\"", "\'")
     model_args, data_args, _, _ = get_infer_args(dict(
-        image_resolution=config["image_resolution"],
+        image_max_pixels=config["image_max_pixels"],
+        image_min_pixels=config["image_min_pixels"],
         cutoff_len=config["cutoff_len"],
         # DO NOT change the following
         model_name_or_path=QWEN2_5_VL_INSTRUCT_PATH,
@@ -103,7 +104,7 @@ def initialize_vllm(config, template_obj, tokenizer):
     return llm, sampling_params
     
 
-def yield_chunks(dataset, metadata_df, template_obj, tokenizer, image_resolution, chunk_size=50):
+def yield_chunks(dataset, metadata_df, template_obj, tokenizer, image_max_pixels, image_min_pixels, chunk_size=50):
     from llamafactory.extras.constants import IGNORE_INDEX
     
     inputs, prompts, labels, metadata = [], [], [], []
@@ -111,7 +112,9 @@ def yield_chunks(dataset, metadata_df, template_obj, tokenizer, image_resolution
     for sample in tqdm(dataset, desc="Preparing data"):
         if sample["images"]:
             multi_modal_data = {
-                "image": template_obj.mm_plugin._regularize_images(sample["images"], image_resolution=image_resolution)
+                "image": template_obj.mm_plugin._regularize_images(sample["images"], 
+                                                                   image_max_pixels=image_max_pixels, 
+                                                                   image_min_pixels=image_min_pixels)
             }
         else:
             multi_modal_data = None
@@ -156,7 +159,8 @@ def generate_simple_cot_chunk(start, end, config, df, dataset_module, llm, sampl
         df, 
         template_obj=template_obj, 
         tokenizer=tokenizer, 
-        image_resolution=config["image_resolution"], 
+        image_max_pixels=config["image_max_pixels"], 
+        image_min_pixels=config["image_min_pixels"],
         chunk_size=config["chunk_size"]
     ):
         
@@ -184,7 +188,8 @@ def generate_simple_cot(start=0, end=100):
     # Initialize dataset
     # Only the following config may be changed
     config = {
-        "image_resolution": 512 * 512,
+        "image_max_pixels": 512 * 512,
+        "image_min_pixels": 16 * 16,
         "cutoff_len": 1024,
         # vllm
         "max_model_len": 16384,

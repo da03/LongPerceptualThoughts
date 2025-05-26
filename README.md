@@ -10,6 +10,7 @@ A framework for enriching visual reasoning with long chain-of-thoughts. We intro
 ![](./assets/overall_pipeline.gif)
 
 ## News
+- ⭐ 2025/05/26: updated LLaMA-Factory version for DPO training
 - ⭐ 2025/05/23: released train and eval code 
 - ⭐ 2025/05/09: released code for data generation
 - ⭐ 2025/04/21: released paper and dataset
@@ -17,7 +18,7 @@ A framework for enriching visual reasoning with long chain-of-thoughts. We intro
 ## Prerequisite
 1. CUDA==11.8
 2. torch==2.5.1
-3. transformers>=4.51.3
+3. transformers>=4.51.3 (tested on 4.51.3)
 4. xformers==v0.0.27.post2
 
 ## 🔧 Usage
@@ -94,7 +95,32 @@ export LLAMAFACTORY_DIR="${PROJECT_ROOT}/third_party_packages/LLaMA-Factory"
 bash run_3_stages_test.sh
 ```
 
-### SFT using LLaMa-Factory
+### SFT/DPO Training using LLaMA-Factory
+
+**IMPORTANT**
+Before SFT/DPO training using LLaMA-Factory, you need to register the custom dataset by modifying `LLaMA-Facotry/data/dataset_info.json`. 
+
+Here is an example:
+```json
+"long_perceptual_thoughts/sft_docci_all_extended_cots": {
+      "file_name": /PATH/TO/DATASET/JSON,
+      "formatting": "sharegpt",
+      "columns": {
+            "messages": "messages",
+            "images": "images",
+            "assistant_prefix": "assistant_prefix"
+      },
+      "tags": {
+            "role_tag": "role",
+            "content_tag": "content",
+            "user_tag": "user",
+            "assistant_tag": "assistant",
+            "system_tag": "system"
+      }
+}
+```
+
+#### Train and Evaluate
 
 We are resource poor. We use **four A40 GPUs** (4 8GB per GPU) for training and defer the evaluation jobs by instantiate eval jobs using another instance to speedup training. More specifically, we use **4 RTX6000 GPUs** (24 GB per GPU) to perform inference and evaluation jobs. 
 
@@ -103,10 +129,13 @@ To disable this evaluation scheme, disable `` and `` in train config.
 1. **Train jobs**
 ```bash
 export DISABLE_VERSION_CHECK=1
-llamafactory-cli train config/llama_factory_train_config.yaml
+llamafactory-cli train config/llama_factory_sft_train_config.yaml     # SFT training
+llamafactory-cli train config/llama_factory_dpo_train_config.yaml     # DPO training
 ```
 
-1. **Evaluation jobs**
+
+
+2. **Evaluation jobs**
 
 By default, we evaluate on [V* bench](https://vstar-seal.github.io). Please download the images in V* Bench from [here](https://huggingface.co/datasets/craigwu/vstar_bench).
 
