@@ -52,7 +52,7 @@ class DOCCI:
 
 
 def infer_template(model_name_or_path):
-    if "DeepSeek-R1" in model_name_or_path:
+    if "DeepSeek-R1" in model_name_or_path or 'R1' in model_name_or_path:
         return "deepseek3"
     elif "Qwen2-VL" in model_name_or_path or "Qwen2.5-VL" in model_name_or_path:
         return "qwen2_vl"
@@ -543,7 +543,12 @@ class OpenAICacheClient:
         self.force_use_cache = force_use_cache
         self.verbose = verbose
         os.makedirs(self.cache_dir, exist_ok=True)  # Ensure cache directory exists
-        self.client = openai.Client(api_key=api_key)
+        #self.client = openai.Client(api_key=api_key)
+        self.client = openai.AzureOpenAI(
+            api_version="2025-04-01-preview",
+            azure_endpoint="https://llm-proxy.perflab.nvidia.com",
+            api_key=api_key,
+        )
 
     def _get_cache_filename(self, system_prompt, prompt, temperature, n):
         '''Generate a unique cache filename based on prompt and parameters.'''

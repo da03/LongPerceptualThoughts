@@ -16,9 +16,14 @@ STAGE_3_CHUNK_SIZE=500
 
 # Feel free to change this phrase to any other cognitive phrase you want to use. 
 # This phrase corresponds to the cognitive cues mentioned in Section 2.3 of the paper.
+export DISABLE_VERSION_CHECK=1
+export PROJECT_ROOT="/root/computer/computer/train_dataset_encoded4/LongPerceptualThoughtsNew/"
+export LLAMAFACTORY_DIR="/root/computer/computer/train_dataset_encoded4/LongPerceptualThoughtsNew/third_party_packages/LLaMA-Factory"
 COGNITIVE_PHRASE="Wait,"
-export QWEN2_5_VL_INSTRUCT_PATH="/PATH/TO/QWEN2.5-VL-INSTRUCT-7B"
-export R1_DISTILLED_QWEN_32_B="/PATH/TO/R1-DISTILLED-QWEN-32B"
+#export QWEN2_5_VL_INSTRUCT_PATH="/PATH/TO/QWEN2.5-VL-INSTRUCT-7B"
+#export R1_DISTILLED_QWEN_32_B="/PATH/TO/R1-DISTILLED-QWEN-32B"
+export QWEN2_5_VL_INSTRUCT_PATH="/root/computer/computer/train_dataset_encoded4/LongPerceptualThoughts/data_gen/Qwen2.5-VL-Instruct-7B"
+export R1_DISTILLED_QWEN_32_B="/root/computer/computer/train_dataset_encoded4/LongPerceptualThoughts/data_gen/R1-Distilled-Qwen-32B"
 
 
 # Stage 1: Generate MCQ
@@ -38,7 +43,7 @@ done
 python main.py collect_simple_cot
 python main.py update_llamafactory_dataset_info
 echo -e "${GREEN}✔ Simple CoT generation complete${NC}"
-
+#
 # Stage 3: Generate long CoT
 for ((i=0; i<N_TEST_IMGS; i+=STAGE_3_CHUNK_SIZE)); do
     end=$((i + STAGE_3_CHUNK_SIZE))

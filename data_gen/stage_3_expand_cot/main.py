@@ -71,6 +71,7 @@ def initialize_dataset(config):
     training_args = Seq2SeqTrainingArguments(output_dir="dummy_dir")
     tokenizer_module = load_tokenizer(model_args)
     tokenizer = tokenizer_module["tokenizer"]
+    #import pdb; pdb.set_trace()
     template_obj = get_template_and_fix_tokenizer(tokenizer, data_args)
     template_obj.mm_plugin.expand_mm_tokens = False  # for vllm generate
     dataset_module = get_dataset(template_obj, model_args, data_args, training_args, "ppo", **tokenizer_module)
@@ -192,6 +193,7 @@ def generate_extended_cot_chunk(cognitive_phrase, start, end, config, df, datase
             simple_cot_list.append(simple_cot)
         
         # Force thinking
+        #import pdb; pdb.set_trace()
         results = llm.generate(inputs, sampling_params)
         
         # Add `precondition_phrase` back to response
