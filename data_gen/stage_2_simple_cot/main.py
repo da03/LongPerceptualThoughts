@@ -292,6 +292,7 @@ def collect_simple_cot():
         "prompt": "_simple_cot_prompt",
         "predict": "_simple_cot_raw_response",
     }, inplace=True)
+    #import pdb; pdb.set_trace()
     
     merged_df = pd.merge(df, intermediate_df, on='mcq_unique_id')
     merged_df.drop_duplicates(subset=["_simple_cot_raw_response"], keep='first', inplace=True)

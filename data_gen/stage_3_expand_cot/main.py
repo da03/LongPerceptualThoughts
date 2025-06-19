@@ -159,6 +159,7 @@ def generate_extended_cot_chunk(cognitive_phrase, start, end, config, df, datase
     n_processed_examples = 0
     if intermediate_df_path.exists():
         n_processed_examples += len(pd.read_json(intermediate_df_path, lines=True))
+    #import pdb; pdb.set_trace()
     
     dataset_module = islice(dataset_module["train_dataset"], start + n_processed_examples, end)
     df = df.iloc[start+n_processed_examples:end]

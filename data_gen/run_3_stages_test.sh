@@ -8,7 +8,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 
-N_TEST_IMGS=5
+N_TEST_IMGS=8000
 
 # Set the chunk size for each stage
 STAGE_2_CHUNK_SIZE=1000
@@ -23,6 +23,8 @@ COGNITIVE_PHRASE="Wait,"
 #export QWEN2_5_VL_INSTRUCT_PATH="/PATH/TO/QWEN2.5-VL-INSTRUCT-7B"
 #export R1_DISTILLED_QWEN_32_B="/PATH/TO/R1-DISTILLED-QWEN-32B"
 export QWEN2_5_VL_INSTRUCT_PATH="/root/computer/computer/train_dataset_encoded4/LongPerceptualThoughts/data_gen/Qwen2.5-VL-Instruct-7B"
+
+# run a 32B version for qwen2.5, OOM -> deepspeed stage 3
 export R1_DISTILLED_QWEN_32_B="/root/computer/computer/train_dataset_encoded4/LongPerceptualThoughts/data_gen/R1-Distilled-Qwen-32B"
 
 
@@ -36,7 +38,8 @@ echo -e "${GREEN}✔ MCQ generation complete${NC}"
 # Stage 2: Generate simple CoT
 # Explicily specify the number of GPUs to use if needed
 # export CUDA_VISIBLE_DEVICES=0,1,2,3
-for ((i=0; i<N_TEST_IMGS; i+=STAGE_2_CHUNK_SIZE)); do
+#for ((i=0; i<N_TEST_IMGS; i+=STAGE_2_CHUNK_SIZE)); do
+for ((i=0; i<58366; i+=STAGE_2_CHUNK_SIZE)); do
     end=$((i + STAGE_2_CHUNK_SIZE))
     python main.py generate_simple_cot --start $i --end $end
 done
@@ -45,7 +48,7 @@ python main.py update_llamafactory_dataset_info
 echo -e "${GREEN}✔ Simple CoT generation complete${NC}"
 #
 # Stage 3: Generate long CoT
-for ((i=0; i<N_TEST_IMGS; i+=STAGE_3_CHUNK_SIZE)); do
+for ((i=0; i<583586; i+=STAGE_3_CHUNK_SIZE)); do
     end=$((i + STAGE_3_CHUNK_SIZE))
     python main.py generate_extended_cot "|${COGNITIVE_PHRASE}|" --start $i --end $end
 done

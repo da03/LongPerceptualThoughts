@@ -14,8 +14,8 @@ from tqdm import tqdm
 tqdm.pandas()
 
 force_use_cache = False
-gpt_4o_mini_model_id = 'gpt-4o-mini-2024-07-18'
-gpt_4o_model_id = 'gpt-4o-2024-08-06'
+gpt_4o_mini_model_id = 'gpt-4o-mini-20240718'
+gpt_4o_model_id = 'gpt-4o-20240806'
 
 
 def check_MCQ_valid(example):
